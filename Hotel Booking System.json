@@ -1,0 +1,767 @@
+{
+  "name": "Hotel Booking System",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "🏨 PRE-ARRIVAL WELCOME EMAIL AUTOMATION\n═══════════════════════════════════════════════════════════\n✨ Automatically sends personalized welcome emails in the day of checkin\n📧 Includes reservation details, hotel amenities, and contact information\n🔄 Checks every 6 hours for upcoming arrivals\n⚡ Updates tracking to prevent duplicate emails\n\n🎯 PERFECT FOR: Guest experience enhancement | Reducing front desk inquiries | Professional first impression",
+        "height": 304,
+        "width": 512,
+        "color": 6
+      },
+      "id": "c8c767a1-43d5-4d8f-97ba-7b6667ad8196",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "058f7c14-70e8-4739-bb68-cc42dbbde91b",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        672,
+        352
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a94938f6-a07d-49d4-a279-73cb2e6a3a6e",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json['Check-in Date'] }}",
+                    "rightValue": "={{ DateTime.now().toFormat('yyyy-MM-dd') }}"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "welcome email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b78e6271-d55b-43a5-b44f-c44c2e3d9c0b",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Get Hotel Reservation').item.json['Check-out Date'] }}",
+                    "rightValue": "={{ DateTime.now().toFormat('yyyy-MM-dd') }}"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Write Review"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "e1bacc1c-41b5-4348-881b-fa8649d7f3c9",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        1424,
+        352
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "content": "⭐ POST-STAY REVIEW REQUEST AUTOMATION\n═══════════════════════════════════════════════════════════\n🎯 Automatically requests reviews from guests  after checkout\n📝 Includes Google Reviews and TripAdvisor links\n\n💡 BOOSTS: Online reputation | Future bookings | Guest loyalty | Review volume",
+        "height": 240,
+        "width": 416,
+        "color": 6
+      },
+      "id": "5e0c33b5-9b34-49d1-a44c-b16eb467d9fb",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Switch').item.json.Email }}",
+        "subject": "Welcome to Hotel - Your Stay Begins Soon! ",
+        "message": "=<p>Dear <strong>{{ $json['Guest Name'] }}</strong>,</p>\n\n<p>Warm greetings from our hotel team! We are absolutely thrilled to welcome you for your upcoming stay in our <strong>{{ $json['Room Type'] }}</strong>.</p>\n\n<p>Here are a few quick details about your reservation:</p>\n<ul>\n  <li><strong>Reservation ID:</strong> {{ $json['Reservation ID'] }}</li>\n  <li><strong>Check-in Date:</strong> {{ $json['Check-in Date'] }}</li>\n  <li><strong>Check-out Date:</strong> {{ $json['Check-out Date'] }}</li>\n</ul>\n\n<p>If you have any special requests (like your noted preference: <em>{{ $json['Special Requests'] }}</em>) or need help arranging airport pickup or local tours around Marrakech, please don't hesitate to reply directly to this email.</p>\n\n<p>Safe travels, and see you very soon!</p>\n\n<p>Best regards,<br>\n<strong>Hotel Management Team</strong></p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "4fa06fe8-fa09-461f-b601-0c3f7cd8195e",
+      "name": "Welcome Email",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1792,
+        256
+      ],
+      "webhookId": "0ad03fe4-6be0-4c11-8087-9c62cfeab4b1",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "tNKyclFv7o3KOvVP",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Switch').item.json.Email }}",
+        "subject": "={{ $('Get Hotel Reservation').item.json['Guest Name'] }}, thank you for staying with US ⭐",
+        "message": "=<p>Dear <strong>{{ $json['Guest Name'] }}</strong>,</p>\n\n<p>Thank you so much for staying with us recently in your <strong>{{ $json['Room Type'] }}</strong>. We truly hope you had a wonderful and memorable experience.</p>\n\n<p>Your feedback means the world to us and helps us constantly improve our service. If you have a spare minute, we would be incredibly grateful if you could share your experience with us or leave a review online:</p>\n\n<p style=\"text-align: center; margin: 25px 0;\">\n  <a href=\"https://g.page/your-hotel-review-link\" style=\"background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;\">Leave a Google Review</a>\n</p>\n\n<p>As a token of our appreciation for your next visit, enjoy a special <strong>10% off</strong> on your next direct booking by using the code: <code>THANKYOU10</code>.</p>\n\n<p>We hope to welcome you back again soon!</p>\n\n<p>Warm regards,<br>\n<strong>Hotel Management Team</strong></p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "90741781-dc06-4b9f-b3b5-abf0f687a6e8",
+      "name": "Write Review",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1792,
+        480
+      ],
+      "webhookId": "0ad03fe4-6be0-4c11-8087-9c62cfeab4b1",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "tNKyclFv7o3KOvVP",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "28f490af-0df5-486b-884d-44017500951f",
+      "name": "Daily at 6 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        576,
+        1232
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "📋 DAILY ARRIVALS & DEPARTURES AUTOMATION\n═══════════════════════════════════════════════════════════\n🌅 Runs every morning at 6:00 AM\n📊 Generates comprehensive arrival/departure report\n📧 Emails to front desk, housekeeping, and management\n\n💼 INCLUDES: Guest details | Room assignments | Housekeeping priorities | Daily statistics",
+        "height": 240,
+        "width": 496,
+        "color": 6
+      },
+      "id": "54dd8a02-9f8c-460e-a439-ce17e7223461",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4",
+          "mode": "list",
+          "cachedResultName": "Hotel Reservation Workflow Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1018713780,
+          "mode": "list",
+          "cachedResultName": "main sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4/edit#gid=1018713780"
+        },
+        "options": {}
+      },
+      "id": "113ab71c-840a-4402-a293-5642ef770103",
+      "name": "Get Hotel Reservation",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        992,
+        352
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UbOcGFUJmKZpIt95",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "8dfa9584-8029-48e0-98c7-37c1d5682610",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json['Welcome Email Sent'] }}",
+              "rightValue": ""
+            },
+            {
+              "id": "8b25deed-f37f-4b10-bf77-0dc82ac7c444",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json['Write Review Email Sent'] }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "04562f30-c051-4eb5-8d57-534ddc1fcbbb",
+      "name": "Filter Upcoming Guest",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        1184,
+        352
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "acd4f2a7-c6a1-4920-8627-481c450d6ff0",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json['Check-in Date'] }}",
+              "rightValue": "={{ DateTime.now().toFormat('yyyy-MM-dd') }}"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "88fd27ed-3742-4d41-ac20-40c796aa12fa",
+      "name": "Filter Today's Arrivals",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        1376,
+        1136
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "47e1f2e5-d620-478e-bd4f-c993c5f4d2e7",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json['Check-out Date'] }}",
+              "rightValue": "={{ DateTime.now().toFormat('yyyy-MM-dd') }}"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fd354a3a-f89c-4a6f-8334-8c8571252b81",
+      "name": "Filter Today's Departures",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        1376,
+        1344
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0583a748-dcd8-401e-8462-d9cf9920940f",
+              "name": "Hotel Name",
+              "type": "string",
+              "value": "Baba Ali"
+            },
+            {
+              "id": "a61803b1-6de2-4479-85eb-e40a65e12cdf",
+              "name": "staff mail a",
+              "type": "string",
+              "value": "mohamedoujabbour.ge@gmail.com"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "d7027f25-af08-44f4-9917-777c264a9b4b",
+      "name": "Add Information",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        752,
+        1232
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "🏨 HOTEL GUEST COMMUNICATION AUTOMATION\n═══════════════════════════════════════════════════════════\n✨ Complete guest journey automation from booking to post-stay\n📧 Pre-arrival welcome emails (1-2 days before check-in)\n⭐ Post-stay review requests (24 hours after checkout)  \n📊 Daily staff reports for arrivals/departures (6 AM daily)\n🔄 Automatic tracking to prevent duplicate communications\n\n🎯 PERFECT FOR: Hotels | B&Bs | Short-term rentals | Guest experience enhancement\n💡 REDUCES: Manual work | Front desk inquiries | Missed follow-ups\n🚀 INCREASES: Guest satisfaction | Online reviews | Operational efficiency\n\n## Who's it for\nHotel managers, property managers, and hospitality businesses wanting to automate guest communications and improve operational efficiency.\n\n## How it works\nThe workflow monitors a Google Sheets reservation database and automatically sends personalized emails at optimal times during the guest journey, while generating daily operational reports for staff.\n\n## How to set up\n1. Replace the Google Sheets ID with your reservation spreadsheet\n2. Update hotel name and contact information in the \"Edit Fields\" nodes\n3. Configure your Gmail credentials for sending emails\n4. Customize email templates with your branding\n5. Set staff email addresses for daily reports\n\n## Requirements\n- Google Sheets with reservation data\n- Gmail account for sending emails\n- n8n instance (self-hosted or cloud)\n\n## How to customize\n- Modify email templates in Gmail nodes\n- Adjust timing in Schedule Trigger nodes\n- Add more data fields in Google Sheets integration\n- Customize report format in \"Create Email HTML\" node\n",
+        "height": 1296,
+        "width": 480
+      },
+      "id": "19984b12-7b8a-4523-8446-9a464e3d4438",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4",
+          "mode": "list",
+          "cachedResultName": "Hotel Reservation Workflow Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1896073069,
+          "mode": "list",
+          "cachedResultName": "Welcome Email tracking ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4/edit#gid=1896073069"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Welcome Email Date": "={{ DateTime.now().setZone('Asia/Kolkata').toFormat('M/d/yy HH:mm:ss') }}\n",
+            "Welcome Email Sent": "yes",
+            "Booking ID": "={{ $('Switch').item.json['Booking ID'] }}"
+          },
+          "matchingColumns": [
+            "Booking ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking ID",
+              "displayName": "Booking ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Welcome Email Sent",
+              "displayName": "Welcome Email Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Welcome Email Date",
+              "displayName": "Welcome Email Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "67a1956d-ee0f-4c4a-b072-0798b5d7a01c",
+      "name": "Mark Welcome Email as Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2080,
+        256
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GYCqxyXSM7HunHzD",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4",
+          "mode": "list",
+          "cachedResultName": "Hotel Reservation Workflow Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 41562717,
+          "mode": "list",
+          "cachedResultName": "Review Email Tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4/edit#gid=41562717"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking ID": "={{ $('Switch').item.json['Booking ID'] }}",
+            "Write Review Email Sent": "yes",
+            "Write Review Email Date": "={{ DateTime.now().setZone('Asia/Kolkata').toFormat('M/d/yy HH:mm:ss') }}"
+          },
+          "matchingColumns": [
+            "Booking ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking ID",
+              "displayName": "Booking ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Write Review Email Sent",
+              "displayName": "Write Review Email Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Write Review Email Date",
+              "displayName": "Write Review Email Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "22733d1f-637d-4608-bc88-77d0c44e9e7b",
+      "name": "Mark Review Email as Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2080,
+        480
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GYCqxyXSM7HunHzD",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Add Information').item.json['staff mail a'] }}",
+        "subject": "={{ DateTime.now().toFormat('yyyy-MM-dd') }} : ",
+        "emailType": "text",
+        "message": "=Daily Operations Briefing\nDate: {{ DateTime.now().toFormat('yyyy-MM-dd') }}\n----------------------------------------\nTODAY'S ARRIVALS:\n\nGuest Name: {{ $json['Guest Name'] }}\nRoom Type: {{ $json['Room Type'] }}\nSpecial Requests: {{ $json['Special Requests'] }}\n----------------------------------------\nTODAY'S DEPARTURES:\n\nGuest Name: {{ $json['Guest Name'] }}\nRoom Type: {{ $json['Room Type'] }}\nCheck-out Date: {{ $json['Check-out Date'] }}\n----------------------------------------\nHotel Management System",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f77b33b4-9b57-4350-b348-515df1d8eb37",
+      "name": "Send Daily Staff Report",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1824,
+        1232
+      ],
+      "webhookId": "6e9adac6-1361-470d-89e6-e205dcfe5adc",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "tNKyclFv7o3KOvVP",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4",
+          "mode": "list",
+          "cachedResultName": "Hotel Reservation Workflow Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1018713780,
+          "mode": "list",
+          "cachedResultName": "main sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ehMeCDuofSTEehi9vlGaab5ScYhznKmST6rj47FaR4/edit#gid=1018713780"
+        },
+        "options": {}
+      },
+      "id": "1d5bc0de-163e-4359-9d6f-4734733551be",
+      "name": "Get All Reservations",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        976,
+        1232
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GYCqxyXSM7HunHzD",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Write Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Review": {
+      "main": [
+        [
+          {
+            "node": "Mark Review Email as Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily at 6 AM": {
+      "main": [
+        [
+          {
+            "node": "Add Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Mark Welcome Email as Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Information": {
+      "main": [
+        [
+          {
+            "node": "Get All Reservations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Hotel Reservation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Reservations": {
+      "main": [
+        [
+          {
+            "node": "Filter Today's Arrivals",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter Today's Departures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Upcoming Guest": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Hotel Reservation": {
+      "main": [
+        [
+          {
+            "node": "Filter Upcoming Guest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Today's Arrivals": {
+      "main": [
+        [
+          {
+            "node": "Send Daily Staff Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Today's Departures": {
+      "main": [
+        [
+          {
+            "node": "Send Daily Staff Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Daily Staff Report": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9b6c855a-eb4a-42c8-9bd7-92dd2b462aa6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "32996da728c34c04920add68181222108327f4af18238744fe78bfbd87141ec1"
+  },
+  "nodeGroups": [],
+  "id": "AzcqzICAzOwlIWHL",
+  "tags": []
+}
